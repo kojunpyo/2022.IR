@@ -9,11 +9,30 @@ import math
 import tkinter as tk
 
 '''
-공통 함수 선언 부분
+공통 함수 선언
 '''
 
-# 키 입력 반응 함수 (움직임)
+# 키 입력 반응 함수 (오브젝트 움직임, 오차에 따라 예측값 갱신)
 def key_down(event) :
+    global compare, plus
+
+    # 프레임마다 예측값만큼 오브젝트가 움직이도록 함
+    compare[1] = [origin_dot[0] + (loop_num+1)*plus*math.cos(math.radians(angle)), origin_dot[1] + (loop_num+1)*plus*math.sin(math.radians(angle))]
+
+    # 실제값과 예측값 순서쌍 비교 (두 번째 창과 세 번째 창)
+    print(compare)
+
+    # 대소관계에 맞춰 예측값 갱신
+    if compare[0][0] > compare [1][0] :
+        plus *= 0.95
+    elif compare[0][0] < compare [1][0] :
+        plus *= 1.05
+
+    # 세 번째 창을 프레임마다 갱신 (서버값은 아님)
+    sketchbook3.delete('all')
+    sketchbook3.create_oval(compare[1][0], compare[1][1], compare[1][0]+30, compare[1][1]+30, fill = "white" )
+
+    # 서버값 갱신
     origin_dot[0] = origin_dot[0] + r*math.cos(math.radians(angle))
     origin_dot[1] = origin_dot[1] + r*math.sin(math.radians(angle))
 
@@ -24,12 +43,8 @@ def click(event) :
     PI = math.pi
     angle = 180 + rad*180/PI
 
-# 값 예측 함수
-def predict(none) :
-    print(none)
-
 '''
-각 창의 무한 반복 설정 (위치 갱신 및 틱레이트 설정)
+무한 반복 함수 선언
 '''
 
 # 무한 반복 함수 (첫 번째 창)
@@ -41,16 +56,21 @@ def main_proc1():
 # 두 번째 창의 갱신 반복 횟수 저장 (목적은 line 47에서 확인)
 loop_num = 0
 
-# 예측 좌표값과 실제 좌표값 비교를 위한 순서쌍 선언
-compare = [0, 0]
+# 예측값 (프레임마다 더할 값)
+plus = 2.0
 
-# 무한 반복 함수 (두 번째 창)
+# 예측 좌표값과 실제 좌표값 비교를 위한 순서쌍 선언
+compare = [[0, 0], [0, 0]]
+
+# 무한 반복 함수 (두 번째 창과 세 번째 창)
 def main_proc2and3():
-    global loop_num
+    global loop_num, compare
 
     sketchbook2.delete('all')
     sketchbook2.create_oval(origin_dot[0], origin_dot[1], origin_dot[0]+30, origin_dot[1]+30, fill = "white" )
     
+    compare[0][0], compare[0][1] = origin_dot[0], origin_dot[1]
+
     if loop_num % 5 == 0 : # 두 번째 창이 5번 갱신될 때마다 세 번째 창을 갱신함. -> 0.1초마다 호출(틱레이트 10)
         sketchbook3.delete('all')
         sketchbook3.create_oval(origin_dot[0], origin_dot[1], origin_dot[0]+30, origin_dot[1]+30, fill = "white" )
