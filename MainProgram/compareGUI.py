@@ -1,32 +1,38 @@
 """
-강화 학습이 적용된 화면을 비교해 보는 파일입니다.
-
 실행하면 나오는 창은 각각 '낮은 틱레이트', '높은 틱레이트', '낮은 틱레이트에 예측 적용'입니다.
 """
 
 # 라이브러리 불러오기
 import math
 import tkinter as tk
+import time
 
 '''
 공통 함수 선언
 '''
 
+# 현재 시간 저장
+start = time.time()
+
 # 키 입력 반응 함수 (오브젝트 움직임, 오차에 따라 예측값 갱신)
 def key_down(event) :
-    global compare, plus
+    global start, compare, plus
 
     # 프레임마다 예측값만큼 오브젝트가 움직이도록 함
     compare[1] = [origin_dot[0] + (loop_num+1)*plus*math.cos(math.radians(angle)), origin_dot[1] + (loop_num+1)*plus*math.sin(math.radians(angle))]
 
-    # 실제값과 예측값 순서쌍 비교 (두 번째 창과 세 번째 창)
-    print(compare)
+    # 서버 처리 시점과 맞추기 위해 조건 설정
+    if time.time() > start + 0.1 :
 
-    # 대소관계에 맞춰 예측값 갱신
-    if compare[0][0] > compare [1][0] :
-        plus *= 0.95
-    elif compare[0][0] < compare [1][0] :
-        plus *= 1.05
+        # 실제값과 예측값 순서쌍 비교 (두 번째 창과 세 번째 창)
+        print(compare)
+
+        # 대소관계에 맞춰 예측값 갱신
+        if compare[0][0] > compare [1][0] :
+            plus *= 0.95
+        elif compare[0][0] < compare [1][0] :
+            plus *= 1.05
+        start = time.time()
 
     # 세 번째 창을 프레임마다 갱신 (서버값은 아님)
     sketchbook3.delete('all')
@@ -57,7 +63,7 @@ def main_proc1():
 loop_num = 0
 
 # 예측값 (프레임마다 더할 값)
-plus = 2.0
+plus = 20.0
 
 # 예측 좌표값과 실제 좌표값 비교를 위한 순서쌍 선언
 compare = [[0, 0], [0, 0]]
